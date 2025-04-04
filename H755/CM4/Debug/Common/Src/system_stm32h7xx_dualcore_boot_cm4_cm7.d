@@ -1,5 +1,5 @@
 Common/Src/system_stm32h7xx_dualcore_boot_cm4_cm7.o: \
- C:/Users/cbogarin/OneDrive\ -\ 1.\ Hydra\ Technologies\ de\ Mexico\ S\ A\ P\ I\ DE\ CV/Escritorio/Proyecto_personal/Test_nucleoH7/H755/Common/Src/system_stm32h7xx_dualcore_boot_cm4_cm7.c \
+ C:/Users/cbogarin/OneDrive\ -\ 1.\ Hydra\ Technologies\ de\ Mexico\ S\ A\ P\ I\ DE\ CV/Escritorio/H755ZI_project/H755/Common/Src/system_stm32h7xx_dualcore_boot_cm4_cm7.c \
  ../../Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h7xx.h \
  ../../Drivers/CMSIS/Device/ST/STM32H7xx/Include/stm32h755xx.h \
  ../../Drivers/CMSIS/Include/core_cm4.h \

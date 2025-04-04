@@ -109,7 +109,18 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  HAL_GPIO_TogglePin(LD2_R_GPIO_Port, LD2_R_Pin);
+/*	  HAL_GPIO_TogglePin(LD2_R_GPIO_Port, LD2_R_Pin);
+	  HAL_Delay(250);*/
+
+	  while (HAL_HSEM_IsSemTaken(HSEM_ID_0));
+	  HAL_HSEM_Take(HSEM_ID_0, 0);
+	  for(uint8_t i=0; i<10; i++)
+	  {
+		  HAL_GPIO_TogglePin(LD2_R_GPIO_Port, LD2_R_Pin);
+		  HAL_Delay(500);
+	  }
+
+	  HAL_HSEM_Release(HSEM_ID_0,0);
 	  HAL_Delay(250);
     /* USER CODE END WHILE */
 

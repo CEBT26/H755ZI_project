@@ -1,5 +1,5 @@
 Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_tim_ex.o: \
- C:/Users/cbogarin/OneDrive\ -\ 1.\ Hydra\ Technologies\ de\ Mexico\ S\ A\ P\ I\ DE\ CV/Escritorio/Proyecto_personal/Test_nucleoH7/H755/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_tim_ex.c \
+ C:/Users/cbogarin/OneDrive\ -\ 1.\ Hydra\ Technologies\ de\ Mexico\ S\ A\ P\ I\ DE\ CV/Escritorio/H755ZI_project/H755/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_tim_ex.c \
  ../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h \
  ../Core/Inc/stm32h7xx_hal_conf.h \
  ../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_rcc.h \

@@ -1,5 +1,5 @@
 Drivers/STM32H7xx_HAL_Driver/stm32h7xx_hal_i2c.o: \
- C:/Users/cbogarin/OneDrive\ -\ 1.\ Hydra\ Technologies\ de\ Mexico\ S\ A\ P\ I\ DE\ CV/Escritorio/Proyecto_personal/Test_nucleoH7/H755/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c.c \
+ C:/Users/cbogarin/OneDrive\ -\ 1.\ Hydra\ Technologies\ de\ Mexico\ S\ A\ P\ I\ DE\ CV/Escritorio/H755ZI_project/H755/Drivers/STM32H7xx_HAL_Driver/Src/stm32h7xx_hal_i2c.c \
  ../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal.h \
  ../Core/Inc/stm32h7xx_hal_conf.h \
  ../../Drivers/STM32H7xx_HAL_Driver/Inc/stm32h7xx_hal_rcc.h \

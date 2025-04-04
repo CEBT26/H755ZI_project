@@ -57,7 +57,7 @@ void SystemClock_Config(void);
 static void MPU_Config(void);
 /* USER CODE BEGIN PFP */
 
-void receiveDataM4(uint8_t *buffer, uint32_t size);
+void receiveDataM4(volatile uint8_t* memoryRegister , uint8_t *buffer, uint32_t size);
 
 /* USER CODE END PFP */
 
@@ -138,7 +138,7 @@ Error_Handler();
   while (1)
   {
 
-	  receiveDataM4(receivedBuffer, 10); // Recibe los 10 bytes desde 0x38000000
+	  receiveDataM4(REG_ADDRESS , receivedBuffer, 10); // Recibe los 10 bytes desde 0x38000000
 	  HAL_Delay(500);
 
 	  /*HAL_GPIO_TogglePin(LD1_G_GPIO_Port, LD1_G_Pin);
@@ -222,14 +222,19 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 
-void receiveDataM4(uint8_t *buffer, uint32_t size)
+void receiveDataM4(volatile uint8_t* memoryRegister , uint8_t *buffer, uint32_t size)
 {
     while (HAL_HSEM_IsSemTaken(HSEM_ID_0));  /*!< Verifica si el semáforo está libre */
     HAL_HSEM_Take(HSEM_ID_0, 0);
 
     // Copia los datos desde la memoria compartida al buffer
-    for (uint32_t i = 0; i < size; i++) {
+    /*for (uint32_t i = 0; i < size; i++) {
         buffer[i] = REG_ADDRESS[i];
+        REG_ADDRESS[i] = 0;
+    }*/
+
+    for (uint32_t i = 0; i < size; i++) {
+    	buffer[i] = memoryRegister[i];
         //REG_ADDRESS[i] = 0;
     }
 

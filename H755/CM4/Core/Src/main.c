@@ -37,6 +37,8 @@
 #define HSEM_ID_0 (0U) /* HW semaphore 0*/
 #endif
 
+#define REG_ADDRESS  ((volatile uint8_t*) 0x38000000)
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -53,10 +55,14 @@
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN PFP */
 
+void sendDataM4(uint8_t *data, uint32_t size);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+uint8_t buffer[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
 /* USER CODE END 0 */
 
@@ -109,10 +115,12 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-/*	  HAL_GPIO_TogglePin(LD2_R_GPIO_Port, LD2_R_Pin);
+	  sendDataM4(buffer, 10);
+	  HAL_Delay(500);
+	  /*HAL_GPIO_TogglePin(LD2_R_GPIO_Port, LD2_R_Pin);
 	  HAL_Delay(250);*/
 
-	  while (HAL_HSEM_IsSemTaken(HSEM_ID_0));
+	  /*while (HAL_HSEM_IsSemTaken(HSEM_ID_0));
 	  HAL_HSEM_Take(HSEM_ID_0, 0);
 	  for(uint8_t i=0; i<10; i++)
 	  {
@@ -121,7 +129,8 @@ int main(void)
 	  }
 
 	  HAL_HSEM_Release(HSEM_ID_0,0);
-	  HAL_Delay(250);
+	  HAL_Delay(250);*/
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -130,6 +139,23 @@ int main(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+void sendDataM4(uint8_t *data, uint32_t size) // Agrega el tamaño de los datos
+{
+	while (HAL_HSEM_IsSemTaken(HSEM_ID_0));	/*!< Verifica si el semáforo está libre */
+	HAL_HSEM_Take(HSEM_ID_0, 0);
+
+	// Copia los datos al registro en la dirección 0x38000000
+	for (uint32_t i = 0; i < size; i++) {
+		REG_ADDRESS[i] = data[i];
+		//data[i] = 0;
+	}
+
+	HAL_GPIO_TogglePin(LD2_R_GPIO_Port, LD2_R_Pin);
+
+	HAL_HSEM_Release(HSEM_ID_0, 0);
+	HAL_Delay(250);
+}
 
 /* USER CODE END 4 */
 

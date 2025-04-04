@@ -37,6 +37,8 @@
 #define HSEM_ID_0 (0U) /* HW semaphore 0*/
 #endif
 
+#define REG_ADDRESS  ((volatile uint8_t*) 0x38000000)
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -55,10 +57,14 @@ void SystemClock_Config(void);
 static void MPU_Config(void);
 /* USER CODE BEGIN PFP */
 
+void receiveDataM4(uint8_t *buffer, uint32_t size);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+uint8_t receivedBuffer[10] = {0}; // Buffer para almacenar los datos recibidos
 
 /* USER CODE END 0 */
 
@@ -131,10 +137,14 @@ Error_Handler();
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+
+	  receiveDataM4(receivedBuffer, 10); // Recibe los 10 bytes desde 0x38000000
+	  HAL_Delay(500);
+
 	  /*HAL_GPIO_TogglePin(LD1_G_GPIO_Port, LD1_G_Pin);
 	  HAL_Delay(500);*/
 
-	  while (HAL_HSEM_IsSemTaken(HSEM_ID_0));
+	  /*while (HAL_HSEM_IsSemTaken(HSEM_ID_0));
 	  HAL_HSEM_Take(HSEM_ID_0, 0);
 	  for(uint8_t i=0; i<10; i++)
 	  {
@@ -142,7 +152,7 @@ Error_Handler();
 		  HAL_Delay(500);
 	  }
 	  HAL_HSEM_Release(HSEM_ID_0,0);
-	  HAL_Delay(100);
+	  HAL_Delay(100);*/
 
     /* USER CODE END WHILE */
 
@@ -211,6 +221,22 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+void receiveDataM4(uint8_t *buffer, uint32_t size)
+{
+    while (HAL_HSEM_IsSemTaken(HSEM_ID_0));  /*!< Verifica si el semáforo está libre */
+    HAL_HSEM_Take(HSEM_ID_0, 0);
+
+    // Copia los datos desde la memoria compartida al buffer
+    for (uint32_t i = 0; i < size; i++) {
+        buffer[i] = REG_ADDRESS[i];
+        //REG_ADDRESS[i] = 0;
+    }
+
+    HAL_GPIO_TogglePin(LD1_G_GPIO_Port, LD1_G_Pin);
+
+    HAL_HSEM_Release(HSEM_ID_0, 0);
+}
 
 /* USER CODE END 4 */
 

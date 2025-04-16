@@ -1,5 +1,5 @@
-../Core/Src/main.c:75:5:main	16	static
-../Core/Src/main.c:168:6:SystemClock_Config	120	static
-../Core/Src/main.c:225:6:receiveDataM4	32	static
-../Core/Src/main.c:250:6:MPU_Config	24	static
-../Core/Src/main.c:281:6:Error_Handler	4	static,ignoring_inline_asm
+../Core/Src/main.c:82:5:main	16	static
+../Core/Src/main.c:162:6:SystemClock_Config	120	static
+../Core/Src/main.c:219:6:receiveDataM4M7	8	static
+../Core/Src/main.c:235:6:MPU_Config	24	static
+../Core/Src/main.c:266:6:Error_Handler	4	static,ignoring_inline_asm

@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "dma.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -37,7 +38,15 @@
 #define HSEM_ID_0 (0U) /* HW semaphore 0*/
 #endif
 
-#define REG_ADDRESS  ((volatile uint8_t*) 0x38000000)
+#define SHARED_RAM_BASE 0x38000000
+#define INS_ANGLES_OFFSET 0x0000
+#define INS_GNSS_OFFSET   0x0100
+
+volatile INS_Angles_Data_Struct_t* sharedAngles = (INS_Angles_Data_Struct_t*)(SHARED_RAM_BASE + INS_ANGLES_OFFSET);
+volatile INS_GNSS_Data_Struct_t* sharedGNSS = (INS_GNSS_Data_Struct_t*)(SHARED_RAM_BASE + INS_GNSS_OFFSET);
+
+INS_Angles_Data_Struct_t INS_Angles_Data_Struct;            //Estructura de datos de INS Angulos y aceleraciones
+INS_GNSS_Data_Struct_t INS_GNSS_Data_Struct;				//Estructura de datos para GNSS
 
 /* USER CODE END PD */
 
@@ -57,14 +66,12 @@ void SystemClock_Config(void);
 static void MPU_Config(void);
 /* USER CODE BEGIN PFP */
 
-void receiveDataM4(volatile uint8_t* memoryRegister , uint8_t *buffer, uint32_t size);
+void receiveDataM4M7(void);
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
-uint8_t receivedBuffer[10] = {0}; // Buffer para almacenar los datos recibidos
 
 /* USER CODE END 0 */
 
@@ -129,6 +136,7 @@ Error_Handler();
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -137,22 +145,8 @@ Error_Handler();
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-
-	  receiveDataM4(REG_ADDRESS , receivedBuffer, 10); // Recibe los 10 bytes desde 0x38000000
+	  receiveDataM4M7();
 	  HAL_Delay(500);
-
-	  /*HAL_GPIO_TogglePin(LD1_G_GPIO_Port, LD1_G_Pin);
-	  HAL_Delay(500);*/
-
-	  /*while (HAL_HSEM_IsSemTaken(HSEM_ID_0));
-	  HAL_HSEM_Take(HSEM_ID_0, 0);
-	  for(uint8_t i=0; i<10; i++)
-	  {
-		  HAL_GPIO_TogglePin(LD1_G_GPIO_Port, LD1_G_Pin);
-		  HAL_Delay(500);
-	  }
-	  HAL_HSEM_Release(HSEM_ID_0,0);
-	  HAL_Delay(100);*/
 
     /* USER CODE END WHILE */
 
@@ -222,24 +216,15 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 
-void receiveDataM4(volatile uint8_t* memoryRegister , uint8_t *buffer, uint32_t size)
+void receiveDataM4M7(void)
 {
     while (HAL_HSEM_IsSemTaken(HSEM_ID_0));  /*!< Verifica si el semáforo está libre */
     HAL_HSEM_Take(HSEM_ID_0, 0);
 
-    // Copia los datos desde la memoria compartida al buffer
-    /*for (uint32_t i = 0; i < size; i++) {
-        buffer[i] = REG_ADDRESS[i];
-        REG_ADDRESS[i] = 0;
-    }*/
-
-    for (uint32_t i = 0; i < size; i++) {
-    	buffer[i] = memoryRegister[i];
-        //REG_ADDRESS[i] = 0;
-    }
+    memcpy(&INS_Angles_Data_Struct, (void*)sharedAngles, sizeof(INS_Angles_Data_Struct_t));
+    memcpy(&INS_GNSS_Data_Struct, (void*)sharedGNSS, sizeof(INS_GNSS_Data_Struct_t));
 
     HAL_GPIO_TogglePin(LD1_G_GPIO_Port, LD1_G_Pin);
-
     HAL_HSEM_Release(HSEM_ID_0, 0);
 }
 

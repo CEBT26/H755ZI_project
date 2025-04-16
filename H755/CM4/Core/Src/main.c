@@ -18,10 +18,15 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "dma.h"
+#include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+
+#include "Global/Global_Definitions.h"
+#include "Middleware Layer/INS_processing.h"
 
 /* USER CODE END Includes */
 
@@ -37,8 +42,6 @@
 #define HSEM_ID_0 (0U) /* HW semaphore 0*/
 #endif
 
-#define REG_ADDRESS  ((volatile uint8_t*) 0x38000000)
-
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -50,19 +53,25 @@
 
 /* USER CODE BEGIN PV */
 
+#define SHARED_RAM_BASE 0x38000000		/*!< Dirección de memoria compartida entre M4 y M7 */
+#define INS_ANGLES_OFFSET 0x0000		/*!< Inicia dirección de memoria de INS-ángulos */
+#define INS_GNSS_OFFSET   0x0100		/*!< Inicia dirección de memoria de INS-GNNS */
+
+/*!< Variables para compartir la información deseada a compartir */
+volatile INS_Angles_Data_Struct_t* sharedAngles = (INS_Angles_Data_Struct_t*)(SHARED_RAM_BASE + INS_ANGLES_OFFSET);
+volatile INS_GNSS_Data_Struct_t* sharedGNSS = (INS_GNSS_Data_Struct_t*)(SHARED_RAM_BASE + INS_GNSS_OFFSET);
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN PFP */
 
-void sendDataM4(volatile uint8_t*, uint8_t *data, uint32_t size);
+void sendDataM4M7(void);
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
-uint8_t buffer[10] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
 
 /* USER CODE END 0 */
 
@@ -107,7 +116,11 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
+  MX_USART6_UART_Init();
   /* USER CODE BEGIN 2 */
+
+  HAL_UART_Receive_DMA(&huart6, &INS_buff_Rx, 1);
 
   /* USER CODE END 2 */
 
@@ -115,21 +128,8 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  sendDataM4( REG_ADDRESS, buffer, 10);
+	  sendDataM4M7();
 	  HAL_Delay(500);
-	  /*HAL_GPIO_TogglePin(LD2_R_GPIO_Port, LD2_R_Pin);
-	  HAL_Delay(250);*/
-
-	  /*while (HAL_HSEM_IsSemTaken(HSEM_ID_0));
-	  HAL_HSEM_Take(HSEM_ID_0, 0);
-	  for(uint8_t i=0; i<10; i++)
-	  {
-		  HAL_GPIO_TogglePin(LD2_R_GPIO_Port, LD2_R_Pin);
-		  HAL_Delay(500);
-	  }
-
-	  HAL_HSEM_Release(HSEM_ID_0,0);
-	  HAL_Delay(250);*/
 
     /* USER CODE END WHILE */
 
@@ -140,24 +140,21 @@ int main(void)
 
 /* USER CODE BEGIN 4 */
 
-void sendDataM4(volatile uint8_t* memoryRegister, uint8_t *data, uint32_t size) // Agrega el tamaño de los datos
+/**
+ * @brief M4 a M7
+ *
+ * @details Envio de datos de M4 al M7, guarda en las posiciones de memoria los datos a cmpartir entre los cores.
+ *
+ */
+void sendDataM4M7(void)
 {
-	while (HAL_HSEM_IsSemTaken(HSEM_ID_0));	/*!< Verifica si el semáforo está libre */
+	while (HAL_HSEM_IsSemTaken(HSEM_ID_0));
 	HAL_HSEM_Take(HSEM_ID_0, 0);
 
-	// Copia los datos al registro en la dirección 0x38000000
-	/*for (uint32_t i = 0; i < size; i++) {
-		REG_ADDRESS[i] = data[i];
-		data[i] = 0;
-	}*/
-
-	for (uint32_t i = 0; i < size; i++) {
-		memoryRegister[i] = data[i];
-		//data[i] = 0;
-	}
+	memcpy((void*)sharedAngles, &INS_Angles_Data_Struct, sizeof(INS_Angles_Data_Struct_t));
+	memcpy((void*)sharedGNSS, &INS_GNSS_Data_Struct, sizeof(INS_GNSS_Data_Struct_t));
 
 	HAL_GPIO_TogglePin(LD2_R_GPIO_Port, LD2_R_Pin);
-
 	HAL_HSEM_Release(HSEM_ID_0, 0);
 	HAL_Delay(250);
 }

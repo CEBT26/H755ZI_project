@@ -23,7 +23,11 @@ C_DEPS :=
 # Every subdirectory with source files must be described here
 SUBDIRS := \
 Common/Src \
+Core/Src/Global \
+Core/Src/Middleware\ Layer \
+Core/Src/RTOS\ Layer \
 Core/Src \
 Core/Startup \
 Drivers/STM32H7xx_HAL_Driver \
+Middlewares/Third_Party/FreeRTOS \
 

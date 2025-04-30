@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "dma.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -37,6 +38,17 @@
 #define HSEM_ID_0 (0U) /* HW semaphore 0*/
 #endif
 
+#define SHARED_RAM_BASE 0x38000000				/*!< Dirección de memoria compartida entre M4 y M7 */
+#define INS_ANGLES_OFFSET 0x0000				/*!< Inicia dirección de memoria de INS-ángulos */
+#define INS_GNSS_OFFSET   0x0100				/*!< Inicia dirección de memoria de INS-GNNS */
+
+/*!< Variables para compartir la información deseada entre el M4 y M7 */
+volatile INS_Angles_Data_Struct_t* sharedAngles = (INS_Angles_Data_Struct_t*)(SHARED_RAM_BASE + INS_ANGLES_OFFSET);
+volatile INS_GNSS_Data_Struct_t* sharedGNSS = (INS_GNSS_Data_Struct_t*)(SHARED_RAM_BASE + INS_GNSS_OFFSET);
+
+INS_Angles_Data_Struct_t INS_Angles_Data_Struct;            /*!< Estructura de datos de INS Angulos y aceleraciones */
+INS_GNSS_Data_Struct_t INS_GNSS_Data_Struct;				/*!< Estructura de datos para GNSS */
+
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -48,12 +60,18 @@
 
 /* USER CODE BEGIN PV */
 
+float pitch;
+float roll;
+float yaw;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MPU_Config(void);
 /* USER CODE BEGIN PFP */
+
+void receiveDataM4M7(void);
 
 /* USER CODE END PFP */
 
@@ -123,6 +141,7 @@ Error_Handler();
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
+  MX_DMA_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
@@ -131,8 +150,12 @@ Error_Handler();
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  HAL_GPIO_TogglePin(LD1_G_GPIO_Port, LD1_G_Pin);
+	  receiveDataM4M7();
+	  pitch = INS_Angles_Data_Struct.Ang_Data_pitch.sFloat;
+	  roll = INS_Angles_Data_Struct.Ang_Data_Roll.sFloat;
+	  yaw = INS_Angles_Data_Struct.Ang_Data_Yaw.sFloat;
 	  HAL_Delay(500);
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -200,6 +223,24 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+/**
+ * @brief: Recepción de datos M4 - M7.
+ *
+ * @details: Recepción de datos compartidos por memoria RAM entre M4 y M7.
+ *
+ */
+void receiveDataM4M7(void)
+{
+    while (HAL_HSEM_IsSemTaken(HSEM_ID_0));  /*!< Verifica si el semáforo está libre */
+    HAL_HSEM_Take(HSEM_ID_0, 0);			 /*!< Toma el semáforo */
+
+    memcpy(&INS_Angles_Data_Struct, (void*)sharedAngles, sizeof(INS_Angles_Data_Struct_t));
+    memcpy(&INS_GNSS_Data_Struct, (void*)sharedGNSS, sizeof(INS_GNSS_Data_Struct_t));
+
+    HAL_GPIO_TogglePin(LD1_G_GPIO_Port, LD1_G_Pin);
+    HAL_HSEM_Release(HSEM_ID_0, 0);			/*!< Libera el semáforo */
+}
 
 /* USER CODE END 4 */
 

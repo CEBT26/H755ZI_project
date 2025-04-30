@@ -11,6 +11,7 @@ RM := rm -rf
 -include sources.mk
 -include Drivers/STM32H7xx_HAL_Driver/subdir.mk
 -include Core/Startup/subdir.mk
+-include Core/Src/Global/subdir.mk
 -include Core/Src/subdir.mk
 -include Common/Src/subdir.mk
 -include objects.mk
@@ -61,8 +62,8 @@ all: main-build
 main-build: H755_CM7.elf secondary-outputs
 
 # Tool invocations
-H755_CM7.elf H755_CM7.map: $(OBJS) $(USER_OBJS) C:\Users\cbogarin\OneDrive\ -\ 1.\ Hydra\ Technologies\ de\ Mexico\ S\ A\ P\ I\ DE\ CV\Escritorio\Proyecto_personal\Test_nucleoH7\H755\CM7\STM32H755ZITX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "H755_CM7.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"C:\Users\cbogarin\OneDrive - 1. Hydra Technologies de Mexico S A P I DE CV\Escritorio\Proyecto_personal\Test_nucleoH7\H755\CM7\STM32H755ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="H755_CM7.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+H755_CM7.elf H755_CM7.map: $(OBJS) $(USER_OBJS) C:\Users\cbogarin\OneDrive\ -\ 1.\ Hydra\ Technologies\ de\ Mexico\ S\ A\ P\ I\ DE\ CV\Escritorio\H755ZI_project\H755\CM7\STM32H755ZITX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "H755_CM7.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m7 -T"C:\Users\cbogarin\OneDrive - 1. Hydra Technologies de Mexico S A P I DE CV\Escritorio\H755ZI_project\H755\CM7\STM32H755ZITX_FLASH.ld" --specs=nosys.specs -Wl,-Map="H755_CM7.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv5-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 

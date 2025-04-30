@@ -1,0 +1,3 @@
+../Core/Src/Middleware Layer/INS_processing.c:24:6:INS_Rx_Message	14
+../Core/Src/Middleware Layer/INS_processing.c:124:6:INS_kindInf	12
+../Core/Src/Middleware Layer/INS_processing.c:360:6:INS_WatchDog	5

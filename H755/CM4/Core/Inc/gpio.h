@@ -34,6 +34,9 @@ extern "C" {
 
 /* USER CODE BEGIN Private defines */
 
+#define LD2_R_Pin GPIO_PIN_1
+#define LD2_R_GPIO_Port GPIOE
+
 /* USER CODE END Private defines */
 
 void MX_GPIO_Init(void);

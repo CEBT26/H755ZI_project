@@ -31,12 +31,15 @@ extern "C" {
 /* USER CODE BEGIN Includes */
 
 #include "Middleware Layer/INS_processing.h"
+#include "usart.h"
 
 /* USER CODE END Includes */
 
 extern UART_HandleTypeDef huart6;
 
 /* USER CODE BEGIN Private defines */
+
+#define INS_HANDLER &huart6
 
 /* USER CODE END Private defines */
 
@@ -45,6 +48,8 @@ void MX_USART6_UART_Init(void);
 /* USER CODE BEGIN Prototypes */
 
 extern uint8_t INS_buff_Rx;
+
+void UART_DMA_Init_function(void);
 
 /* USER CODE END Prototypes */
 

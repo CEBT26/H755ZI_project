@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "cmsis_os.h"
 #include "dma.h"
 #include "usart.h"
 #include "gpio.h"
@@ -57,16 +58,15 @@
 #define INS_ANGLES_OFFSET 0x0000		/*!< Inicia dirección de memoria de INS-ángulos */
 #define INS_GNSS_OFFSET   0x0100		/*!< Inicia dirección de memoria de INS-GNNS */
 
-/*!< Variables para compartir la información deseada a compartir */
+/*!< Variables para compartir la información deseada entre el M4 y M7 */
 volatile INS_Angles_Data_Struct_t* sharedAngles = (INS_Angles_Data_Struct_t*)(SHARED_RAM_BASE + INS_ANGLES_OFFSET);
 volatile INS_GNSS_Data_Struct_t* sharedGNSS = (INS_GNSS_Data_Struct_t*)(SHARED_RAM_BASE + INS_GNSS_OFFSET);
 
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
+void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
-
-void sendDataM4M7(void);
 
 /* USER CODE END PFP */
 
@@ -108,6 +108,9 @@ int main(void)
 
   /* USER CODE BEGIN Init */
 
+  /*!< Delay para permitir la inicialización correcta de los periféricos. Este delay debe ser antes de iniciar el RTOS o cualquier periférico. */
+  HAL_Delay(1000);
+
   /* USER CODE END Init */
 
   /* USER CODE BEGIN SysInit */
@@ -120,16 +123,25 @@ int main(void)
   MX_USART6_UART_Init();
   /* USER CODE BEGIN 2 */
 
-  HAL_UART_Receive_DMA(&huart6, &INS_buff_Rx, 1);
+  UART_DMA_Init_function();
+  //HAL_UART_Receive_DMA(&huart6, &INS_buff_Rx, 1);
 
   /* USER CODE END 2 */
+
+  /* Call init function for freertos objects (in cmsis_os2.c) */
+  MX_FREERTOS_Init();
+
+  /* Start scheduler */
+  osKernelStart();
+
+  /* We should never get here as control is now taken by the scheduler */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  sendDataM4M7();
-	  HAL_Delay(500);
+	  //sendDataM4M7();
+	  //HAL_Delay(500);
 
     /* USER CODE END WHILE */
 
@@ -148,15 +160,15 @@ int main(void)
  */
 void sendDataM4M7(void)
 {
-	while (HAL_HSEM_IsSemTaken(HSEM_ID_0));
-	HAL_HSEM_Take(HSEM_ID_0, 0);
+	while (HAL_HSEM_IsSemTaken(HSEM_ID_0));			/*!< Esperar a que le semáforo esté disponible */
+	HAL_HSEM_Take(HSEM_ID_0, 0);					/*!< Toma del semáforo */
 
 	memcpy((void*)sharedAngles, &INS_Angles_Data_Struct, sizeof(INS_Angles_Data_Struct_t));
 	memcpy((void*)sharedGNSS, &INS_GNSS_Data_Struct, sizeof(INS_GNSS_Data_Struct_t));
 
 	HAL_GPIO_TogglePin(LD2_R_GPIO_Port, LD2_R_Pin);
-	HAL_HSEM_Release(HSEM_ID_0, 0);
-	HAL_Delay(250);
+	HAL_HSEM_Release(HSEM_ID_0, 0);					/*!< Libera el semáforo */
+	osDelay(50);
 }
 
 /* USER CODE END 4 */

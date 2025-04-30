@@ -1,8 +1,10 @@
 /*
- * INS_processing.h
+ * @file: INS_processing.h
  *
- *  Created on: Apr 9, 2025
- *      Author: cbogarin
+ * @details: Estructuras, variables y funciones para el desarrrollo del INS.
+ * @date: Apr 9, 2025
+ * @author: cbogarin
+ *
  */
 
 #ifndef INC_MIDDLEWARE_LAYER_INS_PROCESSING_H_
@@ -12,19 +14,32 @@
 #include "Global/Global_Definitions.h"
 #include <stdio.h>
 #include <string.h>
+#include "usart.h"
 
-#define PREAMBLE 				0xFA
-#define BID						0xFF
-#define MTData2					0x36
+/**
+ * @brief Defines para el uso de los bytes del INS
+ */
+#define PREAMBLE 				0xFA	/*!< Preamble, inicialización de trama */
+#define BID						0xFF	/*!< BID, Identificador de bus */
+#define MTData2					0x36	/*!< ID de mensaje, MTData2 */
 #define INS_ID_MTData_Angles	0x34	/*!< Largo de bytes, en este caso en específico podemos usarlo como un identificador de trama de ángulos y aceleraciones */
-#define INS_ID_AUX_ANGLES		0x55
-#define INS_ID_MTData_GNSS		0x61
-#define INS_Index_Sync1	 		0
-#define INS_Index_Sync2	 		1
-#define INS_Index_ID	 		2
-#define INS_Index_Len	 		3
+#define INS_ID_AUX_ANGLES		0x55	/*!< Largo de bytes, en este caso en específico podemos usarlo como un identificador de trama de ángulos y aceleraciones */
+#define INS_ID_MTData_GNSS		0x61	/*!< Largo de bytes, en este caso en específico podemos usarlo como un identificador de trama de ángulos y aceleraciones */
+#define INS_ID_AUX				0x2D	/*!< ID auxiliar */
+#define INS_Index_Sync1	 		0		/*!< Posición 0 */
+#define INS_Index_Sync2	 		1		/*!< Posición 1 */
+#define INS_Index_ID	 		2		/*!< Posición 2 */
+#define INS_Index_Len	 		3		/*!< Posición 3 */
+#define 	axis_x_invert  		1		/*!< Definición de ejes IMU para eje X */
+#define 	axis_y_invert  		-1		/*!< Definición de ejes IMU para eje Y */
+#define 	axis_z_invert  		1		/*!< Definición de ejes IMU para eje z */
+/**
+ * @}
+ */
 
-//Para tramas principal, secundaria y comandos
+/**
+ * @brief Enum para el filtrado de mensajes.
+ */
 typedef enum INS_RX_STATES_enum
 {
 	INS_STATE_GetSyncFirst,		/*!< Estado preamble */
@@ -34,13 +49,19 @@ typedef enum INS_RX_STATES_enum
 	INS_STATE_GetDataCommands	/*!< Identificador para tipo de trama ángulos/GNSS, Toma los datos del payload */
 } INS_RX_StateCurrent_t;
 
+/**
+ * @brief Enum para el filtrado del tipo de mensajes.
+ */
 typedef enum INS_Cpl_Data_Flag_enum
 {
-	INS_Cpl_Data_Flag_null,
-	INS_Cpl_Data_Flag_Angles,
-	INS_Cpl_Data_Flag_GNSS
+	INS_Cpl_Data_Flag_null,		/*!< Dato nulo. */
+	INS_Cpl_Data_Flag_Angles,	/*!< Recpción del tipo ángulo */
+	INS_Cpl_Data_Flag_GNSS		/*!< Recepción del tipo GNSS */
 }INS_Cpl_Data_Flag_enum_t;
 
+/**
+ * @brief Estructura de los datos de ángulos.
+ */
 typedef struct INS_Angles_Data_Struct_Def
 {
 	uint8_t Sync[2];
@@ -73,6 +94,9 @@ typedef struct INS_Angles_Data_Struct_Def
 
 } INS_Angles_Data_Struct_t;
 
+/**
+ * @brief Estructura de los datos de GNSS.
+ */
 typedef struct INS_GNSS_Data_Struct_Def
 {
 	uint8_t Sync [2];
@@ -110,11 +134,11 @@ typedef struct INS_GNSS_Data_Struct_Def
 	u32_t horizon_accuracy;
 	u32_t vertical_accuracy;
 
-	s32_t north_velocoty; //54
+	s32_t north_velocoty;
 	s32_t east_velocity;
 	s32_t down_velocity;
 
-	s32_t gSpeed; //66
+	s32_t gSpeed;
 
 	s32_t head_Motion;
 
@@ -141,5 +165,6 @@ extern INS_GNSS_Data_Struct_t INS_GNSS_Data_Struct;
 
 void INS_Rx_Message(uint8_t INS_Rx_buff);
 void INS_kindInf(uint8_t *INS_buffRx, INS_Cpl_Data_Flag_enum_t INS_dataFlag);
+void INS_WatchDog(void);
 
 #endif /* INC_MIDDLEWARE_LAYER_INS_PROCESSING_H_ */
